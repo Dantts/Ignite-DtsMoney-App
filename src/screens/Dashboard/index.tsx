@@ -6,6 +6,7 @@ import { useTheme } from 'styled-components';
 
 import { HightlightCard } from '../../components/HightlightCard';
 import { TransactionCard } from '../../components/TransactionCard';
+import { useAuth } from '../../hooks/AuthContext';
 import { ITransactionProps } from '../../models/transaction.model';
 import { transactionKey } from '../../Utils/collectionsKeys';
 import {
@@ -44,6 +45,7 @@ export const Dashboard = () => {
   const [highlightData, setHighlightData] = useState<IHighlightProps>({} as IHighlightProps);
 
   const theme = useTheme();
+  const { signOut, user } = useAuth();
 
   const getLastTransaction = (collection: ITransactionProps[], type: 'positive' | 'negative') => {
     if (collection.length === (0 || 1)) {
@@ -68,28 +70,28 @@ export const Dashboard = () => {
     let entriesTotal = 0;
     let expensiveTotal = 0;
 
-    const storageData = await AsyncStorage.getItem(transactionKey);
+    const storageData = await AsyncStorage.getItem(transactionKey + `_user:${user.id}`);
 
     const transactionData = storageData != (undefined || null) ? JSON.parse(storageData) : [];
 
-    // if (transactionData.length === 0) {
-    //   setHighlightData({
-    //     entries: {
-    //       lastTransaction: undefined,
-    //       amount: undefined
-    //     },
-    //     expensives: {
-    //       lastTransaction: undefined,
-    //       amount: undefined
-    //     },
-    //     total: {
-    //       lastTransaction: undefined,
-    //       amount: undefined
-    //     }
-    //   })
-    //   setIsLoading(false);
-    //   return;
-    // }
+    if (transactionData.length === 0) {
+      setHighlightData({
+        entries: {
+          lastTransaction: undefined,
+          amount: undefined
+        },
+        expensives: {
+          lastTransaction: undefined,
+          amount: undefined
+        },
+        total: {
+          lastTransaction: undefined,
+          amount: undefined
+        }
+      })
+      setIsLoading(false);
+      return;
+    }
 
     const transactionFormatted: ITransactionProps[] = transactionData.map((transaction: ITransactionProps) => {
       transaction.type === 'positive' ?
@@ -157,14 +159,14 @@ export const Dashboard = () => {
           <Header>
             <UserWrapper>
               <UserInfo>
-                <Photo source={{ uri: "https://avatars.githubusercontent.com/u/80539719?v=4" }} />
+                <Photo source={{ uri: user.photo }} />
                 <User>
                   <UserGreeting>Olá, </UserGreeting>
-                  <UserName>Gabriel</UserName>
+                  <UserName>{user.name}</UserName>
                 </User>
               </UserInfo>
 
-              <LogoutButtom onPress={() => { }}>
+              <LogoutButtom onPress={signOut}>
                 <Icon name="power" />
               </LogoutButtom>
             </UserWrapper>

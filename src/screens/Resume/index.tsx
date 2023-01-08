@@ -10,6 +10,7 @@ import { VictoryPie } from 'victory-native';
 
 import { HistoryCard } from '../../components/HistoryCard';
 import theme from '../../global/styles/theme';
+import { useAuth } from '../../hooks/AuthContext';
 import { ITransactionProps } from '../../models/transaction.model';
 import { categories } from '../../Utils/categories';
 import { transactionKey } from '../../Utils/collectionsKeys';
@@ -36,13 +37,14 @@ interface CardCategoryProps {
 }
 
 export const Resume = () => {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [expensiveCategories, setexpensiveCategories] = useState<CardCategoryProps[]>([]);
 
   const loadData = async () => {
     setIsLoading(true)
-    const storageData = await AsyncStorage.getItem(transactionKey);
+    const storageData = await AsyncStorage.getItem(transactionKey + `_user:${user.id}`);
 
     const transactionData: ITransactionProps[] = storageData != (undefined || null) ? JSON.parse(storageData) : [];
 

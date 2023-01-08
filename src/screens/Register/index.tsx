@@ -11,6 +11,7 @@ import { Buttom } from '../../components/Form/Buttom';
 import { CategorySelectButtom } from '../../components/Form/CategorySelectButtom';
 import { InputForm } from '../../components/Form/InputForm';
 import { TransactionTypeButton } from '../../components/Form/TransactionTypeButton';
+import { useAuth } from '../../hooks/AuthContext';
 import { transactionKey } from '../../Utils/collectionsKeys';
 import { CategorySelect } from '../CategorySelect';
 import { Container, Fields, Form, Header, Title, TransactionsTypesContainer } from './styles';
@@ -30,7 +31,7 @@ const yupSchema = Yup.object().shape({
 
 
 export const Register = () => {
-
+  const { user } = useAuth();
   const [transactionType, setTransactionType] = useState('');
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [category, setCategory] = useState({
@@ -81,10 +82,8 @@ export const Register = () => {
     }
 
     try {
-      const currentTransactions = JSON.parse(await AsyncStorage.getItem(transactionKey)) || [];
-      await AsyncStorage.setItem(transactionKey, JSON.stringify([...currentTransactions, newTransaction]));
-      console.log(currentTransactions);
-
+      const currentTransactions = JSON.parse(await AsyncStorage.getItem(transactionKey + `_user:${user.id}`)) || [];
+      await AsyncStorage.setItem(transactionKey + `_user:${user.id}`, JSON.stringify([...currentTransactions, newTransaction]));
       reset()
       setTransactionType('');
       setCategory({
